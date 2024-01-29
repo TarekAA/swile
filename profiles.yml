@@ -1,0 +1,12 @@
+swile:
+  outputs:
+    dev:
+      dbname: swile
+      host: localhost
+      pass: toor
+      port: 5432
+      schema: general
+      threads: 1
+      type: postgres
+      user: postgres
+  target: dev
