@@ -1,0 +1,5 @@
+sources:
+  - name: general
+    tables:
+      - name: transactions_staging
+      - name: siret_naf_staging
