@@ -1,12 +1,22 @@
+"""
+scrit that contain logic to load data and move it to prod table.
+Runs DBT commands
+"""
+
 import json
 import psycopg2
 from minio import Minio
 from swile.airflow_dags.constants import *
 from dbt.cli.main import dbtRunner, dbtRunnerResult
 import argparse
+import typing
 
 
-def obtain_mino_client():
+def obtain_mino_client() -> Minio:
+    """Obtain MinIO client using configuration found in constants.py
+
+    :return: Minio client
+    """
     mc = Minio(
         MINO_SERVER_END_POINT,
         access_key=MINO_ACCESS_KEY,
@@ -16,7 +26,14 @@ def obtain_mino_client():
     return mc
 
 
-def obtain_json_file_from_bucket(bucket_name, file_name, mc: Minio = None):
+def obtain_json_file_from_bucket(bucket_name: str, file_name: str, mc: Minio = None) -> typing.Any:
+    """ Obtain JSON file from MinIO bucket
+
+    :param bucket_name: str, bucket_name where the objetct / file resides
+    :param file_name: str, object / file_name inside the bucket
+    :param mc: MinIO client. If None initialize client from constatnts.py
+    :return:  json_data, dictionary containing obtained json data. We assume all objects to be in json format
+    """
     mc = obtain_mino_client() if not mc else mc
     str_data_encoded = mc.get_object(bucket_name, file_name).read().decode('utf-8')
     json_data = json.loads(str_data_encoded)
@@ -24,6 +41,14 @@ def obtain_json_file_from_bucket(bucket_name, file_name, mc: Minio = None):
 
 
 def insert_into_postgres(bucket_name: str, file_name: str, table_name: str):
+    """ Connect to MinIO and obtain json event data from a file, then
+    insert all content into postgres database using psycopg2 connector
+
+    :param bucket_name: str, bucket_name where the objetct / file resides
+    :param file_name: str, object / file_name inside the bucket
+    :param table_name: str, table to write to
+    :return: None
+    """
     # Obtain JSON data from MinIO
     mino_client = obtain_mino_client()
     data = obtain_json_file_from_bucket(bucket_name, file_name, mino_client)
@@ -59,6 +84,15 @@ def insert_into_postgres(bucket_name: str, file_name: str, table_name: str):
 
 
 def run_dbt_project(cli_args: list[str] = None):
+    """ Run DBT project or portion of the DBT project.
+    Command args should be passed, specially --project-dir and --profiles-dir.
+    Other options are optionals but recommended such as --select.
+
+    If no args were passed run the entire DBT project with arguments from constatnts.py
+
+    :param cli_args: list[str], args to be passed to DBT command
+    :return: None
+    """
     # initialize
     dbt = dbtRunner()
 
@@ -82,7 +116,7 @@ if __name__ == '__main__':
     parser.add_argument('--object_name', type=str, help='The event data file_name / date, no format.')
     args = parser.parse_args()
     # This part is for manually loading a file from MinIO into postgresql
-    object_name = "2023-10-04.json" if not args.object_name else f"{args.object_name}.json"
+    object_name = "2023-10-01.json" if not args.object_name else f"{args.object_name}.json"
 
     # Obtain JSON file and insert it into staging table
     insert_into_postgres(MINO_BUCKET_NAME, object_name, table_name=TRANSACTIONS_STAGING_TABLE)

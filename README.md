@@ -87,8 +87,9 @@ but I had few issues that need to be solved and it's still WIP.
 - Fixing Airflow deployment image and docker-compose.yml
 - Define table access control by hide staging tables and assigning read access to dev roles only
 - Move to an analytical database instead of transaction database
-- Re-partition bucket by year and month. This should in theory increase preformance when
-    we have a lot of files in the bucket
+- Re-partition bucket by year and month. This should in theory increase performance when
+    we have a lot of files in the bucket. This is done on kafka side.
+- Refactor system connections e.g., postgres, MinIO, etc to be in a single file
 - Adding DBT documentation to each table
 - Adding DBT tests on different tables specially final `spent`
 - Using airflow Sensors instead of operators to detect when a file is added to bucket
