@@ -131,3 +131,5 @@ def write_naf_codes():
 if __name__ == "__main__":
     generate_siret_to_be_mapped_table()
     write_naf_codes()
+    generate_siret_naf_table()
+    generate_spent_table()
