@@ -85,4 +85,8 @@ if __name__ == '__main__':
 
     # Move data from staging into final table
 
-    run_dbt_project()
+    cli_args = ["run",
+                "--select", "transactions",
+                "--project-dir", "swile/dbt/swile",
+                "--profiles-dir", "swile/"]
+    run_dbt_project(cli_args)
