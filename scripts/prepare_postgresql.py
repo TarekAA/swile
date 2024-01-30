@@ -4,13 +4,13 @@ from swile.airflow_dags.load_event_data import run_dbt_project
 
 create_transaction_staging_commands = ["run-operation", "create_transaction_staging_table",
                                        "--args", '{"table_name": "transactions_staging"}',
-                                       "--project-dir", "swile/dbt/swile",
-                                       "--profiles-dir", "swile/"]
+                                       "--project-dir", f"{DIR_PATH}dbt/swile",
+                                       "--profiles-dir", f"{DIR_PATH}"]
 
 create_siret_naf_staging = ["run-operation", "create_siret_naf_staging_table",
                             "--args", '{"table_name": "siret_naf_staging"}',
-                            "--project-dir", "swile/dbt/swile",
-                            "--profiles-dir", "swile/"]
+                            "--project-dir", f"{DIR_PATH}dbt/swile",
+                            "--profiles-dir", f"{DIR_PATH}"]
 
 
 def safe_execute(command, conn=None, cur=None, update_config=None, close=True):

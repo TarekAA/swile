@@ -2,8 +2,12 @@ swile:
   outputs:
     dev:
       dbname: swile
+
+#      host: postgres-container
+#      pass: password
       host: localhost
       pass: toor
+
       port: 5432
       schema: general
       threads: 1

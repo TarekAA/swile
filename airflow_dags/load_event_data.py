@@ -26,7 +26,7 @@ def insert_into_postgres(bucket_name: str, file_name: str, table_name: str):
     # Obtain JSON data from MinIO
     mino_client = obtain_mino_client()
     data = obtain_json_file_from_bucket(bucket_name, file_name, mino_client)
-    print(data)
+    # print(data)
 
     # Insert JSON data in postgresql
 
@@ -62,12 +62,12 @@ def run_dbt_project(cli_args: list[str] = None):
     dbt = dbtRunner()
 
     if not cli_args:
-        cli_args = ["run", "--project-dir", "swile/dbt/swile",
-                    "--profiles-dir", "swile/"]
+        cli_args = ["run", "--project-dir", f"{DIR_PATH}dbt/swile",
+                    "--profiles-dir", f"{DIR_PATH}"]
 
     # run the command
     res: dbtRunnerResult = dbt.invoke(cli_args)
-
+    print(res)
     # inspect the results
     for r in res.result:
         if hasattr(r, 'node'):
@@ -87,6 +87,6 @@ if __name__ == '__main__':
 
     cli_args = ["run",
                 "--select", "transactions",
-                "--project-dir", "swile/dbt/swile",
-                "--profiles-dir", "swile/"]
+                "--project-dir", F"{DIR_PATH}dbt/swile",
+                "--profiles-dir", f"{DIR_PATH}"]
     run_dbt_project(cli_args)

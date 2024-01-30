@@ -1,19 +1,9 @@
 import requests
 from dataclasses import dataclass, field
 import psycopg2
-from sqlalchemy import create_engine
 import pandas as pd
 from swile.airflow_dags.constants import *
 from swile.airflow_dags.load_event_data import run_dbt_project
-
-
-def get_postgres_engine():
-    pg_config = dict(**PG_CONFIG)
-    pg_config['dbname'] = DB_NAME
-    postgres_engine_url = "postgresql://{user}:{password}@{host}:5432/{dbname}"
-    postgres_engine_url = postgres_engine_url.format(**pg_config)
-    engine = create_engine(postgres_engine_url)
-    return engine
 
 
 def get_postgres_db_cursor():
@@ -99,22 +89,22 @@ def generate_siret_to_be_mapped_table():
     # we run siret_naf here to make sure the table get created when it's run for the first time
     # we will recall back at the end
     cli_args = ["run", "--select", "siret_naf", "siret_to_be_mapped",
-                "--project-dir", "swile/dbt/swile",
-                "--profiles-dir", "swile/"]
+                "--project-dir", f"{DIR_PATH}dbt/swile",
+                "--profiles-dir", f"{DIR_PATH}"]
     run_dbt_project(cli_args)
 
 
 def generate_siret_naf_table():
     cli_args = ["run", "--select", "siret_naf",
-                "--project-dir", "swile/dbt/swile",
-                "--profiles-dir", "swile/"]
+                "--project-dir", f"{DIR_PATH}dbt/swile",
+                "--profiles-dir", f"{DIR_PATH}"]
     run_dbt_project(cli_args)
 
 
-def generate_spent_table():
+def generate_spent_table(dir_path_or_relative=''):
     cli_args = ["run", "--select", "spent",
-                "--project-dir", "swile/dbt/swile",
-                "--profiles-dir", "swile/"]
+                "--project-dir", f"{DIR_PATH}dbt/swile",
+                "--profiles-dir", f"{DIR_PATH}"]
     run_dbt_project(cli_args)
 
 
