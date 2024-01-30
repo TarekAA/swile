@@ -3,6 +3,7 @@ import psycopg2
 from minio import Minio
 from swile.airflow_dags.constants import *
 from dbt.cli.main import dbtRunner, dbtRunnerResult
+import argparse
 
 
 def obtain_mino_client():
@@ -77,8 +78,11 @@ def run_dbt_project(cli_args: list[str] = None):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='insert transaction data into database')
+    parser.add_argument('--object_name', type=str, help='The event data file_name / date, no format.')
+    args = parser.parse_args()
     # This part is for manually loading a file from MinIO into postgresql
-    object_name = "2023-10-04.json"
+    object_name = "2023-10-04.json" if not args.object_name else f"{args.object_name}.json"
 
     # Obtain JSON file and insert it into staging table
     insert_into_postgres(MINO_BUCKET_NAME, object_name, table_name=TRANSACTIONS_STAGING_TABLE)
