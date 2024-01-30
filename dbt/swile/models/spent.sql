@@ -36,15 +36,17 @@ with transactions as (
 )
 
 , spent_with_missing_naf as (
-    select *
-    from aggregated_spent
+    select a."date", a.naf_code, a.spent
+    from aggregated_spent a
     union all
-    select *
-    from dates_naf
+    select b."date", b.naf_code, b.spent
+    from dates_naf b
 )
 
 , spent_with_missing_naf_aggregated as (
     select "date", naf_code, sum(spent) as "spent"
+    from spent_with_missing_naf
+    group by 1, 2
 )
-select *
+select "date", naf_code, spent
 from spent_with_missing_naf_aggregated
