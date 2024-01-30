@@ -37,3 +37,69 @@ services:
       /usr/bin/mc anonymous set public swile-minio/transactions;
       /usr/bin/mc cp --recursive /tmp/transactions swile-minio/
       "
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres-container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+  prep:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: prep
+    depends_on:
+      - minio
+      - postgres
+    environment:
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:toor@postgres-container/postgres
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      MINIO_ENDPOINT: minio-container:9000
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: password
+      entrypoint: >
+        python /opt/airflow/dags/swile/scripts/prepare_postgresql.py
+    volumes:
+#      - ./swile:/opt/airflow/dags/swile
+      - ./../swile:/opt/airflow/dags/swile
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+#      - dbt_logs:/swile/dbt/swile/logs
+
+
+
+
+
+  airflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: airflow-container
+    ports:
+      - "8080:8080"
+    depends_on:
+      - minio
+      - postgres
+    environment:
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:toor@postgres-container/postgres
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      MINIO_ENDPOINT: minio-container:9000
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: password
+    volumes:
+      - ./../swile:/opt/airflow/dags/swile
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+#      - dbt_logs:/swile/dbt/swile/logs
+
+volumes:
+  postgres_data:
+#  dbt_logs:
